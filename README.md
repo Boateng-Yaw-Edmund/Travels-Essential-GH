@@ -26,9 +26,18 @@ npm run db:check
 reserved for schema migrations and administrative tasks. Never expose either
 value through a `VITE_*` variable or commit `.env.local`.
 
-Create the owner through Neon Auth, then assign that user the `admin` role.
-There is no public admin-registration route in this application. The API also
-rejects banned users even if their Neon Auth session remains valid.
+Create the first owner from an interactive VS Code terminal:
+
+```bash
+npm run admin:create
+```
+
+The command asks for email, display name, and a hidden password, creates the
+Neon Auth user, assigns the managed `admin` role by UUID, and revokes the
+temporary provisioning session. It never accepts the password as a command
+argument or writes it to disk. There is no public admin-registration route in
+the application. The API also rejects banned users even if their Neon Auth
+session remains valid.
 
 ## Run locally
 

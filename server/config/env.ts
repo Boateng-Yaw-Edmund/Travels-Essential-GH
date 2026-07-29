@@ -23,6 +23,15 @@ function isValidOrigin(value: string, secureCookies: boolean): boolean {
   }
 }
 
+function isValidNeonAuthPath(pathname: string): boolean {
+  const segments = pathname.split('/').filter(Boolean)
+  return (
+    (segments.length === 1 || segments.length === 2) &&
+    segments.at(-1) === 'auth' &&
+    segments.every((segment) => /^[A-Za-z0-9_-]+$/.test(segment))
+  )
+}
+
 export function validateAuthEnv(
   env: Readonly<Record<string, string | undefined>>,
 ): AuthEnvironment {
@@ -47,7 +56,7 @@ export function validateAuthEnv(
     parsedNeonAuthUrl.protocol !== 'https:' ||
     !parsedNeonAuthUrl.hostname.endsWith('.neon.tech') ||
     !parsedNeonAuthUrl.hostname.includes('.neonauth.') ||
-    parsedNeonAuthUrl.pathname !== '/auth' ||
+    !isValidNeonAuthPath(parsedNeonAuthUrl.pathname) ||
     parsedNeonAuthUrl.search !== '' ||
     parsedNeonAuthUrl.hash !== '' ||
     parsedNeonAuthUrl.username !== '' ||

@@ -23,7 +23,10 @@ const database = createDatabaseClient(databaseEnvironment.pooledUrl)
 const adminRepository = createAdminRepository(database)
 const gateway = createNeonAuthGateway({
   authBaseUrl: environment.neonAuthBaseUrl,
+  appOrigin: environment.allowedOrigins[0],
+  findSession: adminRepository.findSession,
   isActiveAdmin: adminRepository.isActiveAdmin,
+  revokeSession: adminRepository.revokeSession,
 })
 const handlers = createAuthHandlers({
   gateway,

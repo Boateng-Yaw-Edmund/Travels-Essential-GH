@@ -18,6 +18,7 @@ const user = {
   email: 'OWNER@example.com',
 }
 const sessionToken = ['session', 'token'].join('-')
+const bodySessionToken = ['body', 'session', 'token'].join('-')
 
 describe('Neon Auth gateway', () => {
   it('signs in with Better Auth and keeps the bearer token server-side', async () => {
@@ -30,8 +31,11 @@ describe('Neon Auth gateway', () => {
     )
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth/',
+      appOrigin: 'http://localhost:5173',
       fetch,
       isActiveAdmin: vi.fn(),
+      findSession: vi.fn(),
+      revokeSession: vi.fn(),
       sessionMaxAgeSeconds: 604_800,
     })
 
@@ -49,6 +53,9 @@ describe('Neon Auth gateway', () => {
       'https://example.neonauth.us-east-2.aws.neon.tech/auth/sign-in/email',
       expect.objectContaining({
         method: 'POST',
+        headers: expect.objectContaining({
+          Origin: 'http://localhost:5173',
+        }),
         body: JSON.stringify({
           email: 'owner@example.com',
           password: 'password123',
@@ -65,8 +72,11 @@ describe('Neon Auth gateway', () => {
       .mockResolvedValueOnce(jsonResponse(200, { user }))
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      appOrigin: 'http://localhost:5173',
       fetch,
       isActiveAdmin: vi.fn(),
+      findSession: vi.fn(),
+      revokeSession: vi.fn(),
     })
 
     await expect(
@@ -77,18 +87,45 @@ describe('Neon Auth gateway', () => {
     ).resolves.toBeNull()
   })
 
-  it('validates a bearer session and derives its remaining lifetime', async () => {
-    const now = new Date('2026-07-29T12:00:00.000Z')
+  it('accepts Neon Auth bearer tokens returned in the JSON body', async () => {
     const fetch = vi.fn().mockResolvedValue(
       jsonResponse(200, {
-        session: { expiresAt: '2026-07-29T13:00:00.000Z' },
+        token: bodySessionToken,
         user,
       }),
     )
     const gateway = createNeonAuthGateway({
-      authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      authBaseUrl:
+        'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      appOrigin: 'http://localhost:5173',
       fetch,
       isActiveAdmin: vi.fn(),
+      findSession: vi.fn(),
+      revokeSession: vi.fn(),
+    })
+
+    await expect(
+      gateway.signInWithPassword('owner@example.com', 'password123'),
+    ).resolves.toMatchObject({
+      token: bodySessionToken,
+      user: { email: 'owner@example.com' },
+    })
+  })
+
+  it('validates a database session and derives its remaining lifetime', async () => {
+    const now = new Date('2026-07-29T12:00:00.000Z')
+    const findSession = vi.fn().mockResolvedValue({
+      expiresAt: '2026-07-29T13:00:00.000Z',
+      user,
+    })
+    const fetch = vi.fn()
+    const gateway = createNeonAuthGateway({
+      authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      appOrigin: 'http://localhost:5173',
+      fetch,
+      isActiveAdmin: vi.fn(),
+      findSession,
+      revokeSession: vi.fn(),
       now: () => now,
     })
 
@@ -100,39 +137,29 @@ describe('Neon Auth gateway', () => {
         email: 'owner@example.com',
       },
     })
-    expect(fetch).toHaveBeenCalledWith(
-      'https://example.neonauth.us-east-2.aws.neon.tech/auth/get-session',
-      expect.objectContaining({
-        method: 'GET',
-        headers: expect.objectContaining({
-          Authorization: 'Bearer session-token',
-        }),
-      }),
-    )
+    expect(findSession).toHaveBeenCalledWith('session-token')
+    expect(fetch).not.toHaveBeenCalled()
   })
 
   it('treats expired, rejected, and malformed sessions as unauthenticated', async () => {
-    const fetch = vi
+    const findSession = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(401, {}))
-      .mockResolvedValueOnce(
-        jsonResponse(200, { session: null, user: null }),
-      )
-      .mockResolvedValueOnce(
-        jsonResponse(200, {
-          session: { expiresAt: '2026-07-29T11:59:59.000Z' },
-          user,
-        }),
-      )
-      .mockResolvedValueOnce(jsonResponse(200, { session: {}, user }))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        expiresAt: '2026-07-29T11:59:59.000Z',
+        user,
+      })
+      .mockResolvedValueOnce({ expiresAt: 'invalid', user })
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
-      fetch,
+      appOrigin: 'http://localhost:5173',
+      fetch: vi.fn(),
       isActiveAdmin: vi.fn(),
+      findSession,
+      revokeSession: vi.fn(),
       now: () => new Date('2026-07-29T12:00:00.000Z'),
     })
 
-    await expect(gateway.getSession('rejected')).resolves.toBeNull()
     await expect(gateway.getSession('missing')).resolves.toBeNull()
     await expect(gateway.getSession('expired')).resolves.toBeNull()
     await expect(gateway.getSession('malformed')).resolves.toBeNull()
@@ -142,40 +169,49 @@ describe('Neon Auth gateway', () => {
     const isActiveAdmin = vi.fn().mockResolvedValue(true)
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      appOrigin: 'http://localhost:5173',
       fetch: vi.fn(),
       isActiveAdmin,
+      findSession: vi.fn(),
+      revokeSession: vi.fn(),
     })
 
     await expect(gateway.isActiveAdmin(user.id)).resolves.toBe(true)
     expect(isActiveAdmin).toHaveBeenCalledWith(user.id)
   })
 
-  it('revokes bearer sessions and accepts an already-expired session', async () => {
-    const fetch = vi
+  it('revokes database sessions and accepts an already-expired session', async () => {
+    const revokeSession = vi
       .fn()
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-      .mockResolvedValueOnce(jsonResponse(401, {}))
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
-      fetch,
+      appOrigin: 'http://localhost:5173',
+      fetch: vi.fn(),
       isActiveAdmin: vi.fn(),
+      findSession: vi.fn(),
+      revokeSession,
     })
 
     await expect(gateway.signOut('active')).resolves.toBeUndefined()
     await expect(gateway.signOut('expired')).resolves.toBeUndefined()
+    expect(revokeSession).toHaveBeenCalledTimes(2)
   })
 
-  it('uses generic errors for provider failures without leaking response data', async () => {
+  it('uses generic errors for password-provider failures without leaking response data', async () => {
     const gateway = createNeonAuthGateway({
       authBaseUrl: 'https://example.neonauth.us-east-2.aws.neon.tech/auth',
+      appOrigin: 'http://localhost:5173',
       fetch: vi.fn().mockResolvedValue(jsonResponse(503, { secret: 'detail' })),
       isActiveAdmin: vi.fn(),
+      findSession: vi.fn(),
+      revokeSession: vi.fn(),
     })
 
-    await expect(gateway.getSession('session-token')).rejects.toThrow(
-      'Authentication provider request failed.',
-    )
-    await expect(gateway.signOut('session-token')).rejects.toThrow(
+    await expect(
+      gateway.signInWithPassword('owner@example.com', 'password123'),
+    ).rejects.toThrow(
       'Authentication provider request failed.',
     )
   })

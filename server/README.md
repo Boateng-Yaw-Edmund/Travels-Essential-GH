@@ -45,6 +45,10 @@ adapter is added.
 
 ## Neon authentication
 
+Provision the first owner with `npm run admin:create` from an interactive
+terminal. The password prompt is hidden, and the command uses the direct
+administrative database connection only for the one-row role update.
+
 - Restore the admin session once when the dashboard boots; do not poll it.
 - The GET session route validates the existing Neon Auth bearer session.
 - The origin-checked, CSRF-protected, rate-limited POST refresh route renews

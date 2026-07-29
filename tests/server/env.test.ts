@@ -23,6 +23,20 @@ describe('validateAuthEnv', () => {
     })
   })
 
+  it('accepts Neon Auth URLs scoped to a database path', () => {
+    expect(
+      validateAuthEnv({
+        NEON_AUTH_BASE_URL:
+          'https://example.neonauth.us-east-2.aws.neon.tech/neondb/auth',
+        AUTH_ALLOWED_ORIGINS: 'http://localhost:5173',
+        AUTH_COOKIE_SECURE: 'false',
+      }),
+    ).toMatchObject({
+      neonAuthBaseUrl:
+        'https://example.neonauth.us-east-2.aws.neon.tech/neondb/auth',
+    })
+  })
+
   it('fails fast when the auth service URL is missing', () => {
     expect(() =>
       validateAuthEnv({

@@ -8,6 +8,7 @@
     "dev:web": "vite",
     "dev:api": "tsx watch --env-file=.env.local server/index.ts",
     "db:check": "node --env-file=.env.local --import tsx server/db/check.ts",
+    "admin:create": "node --env-file=.env.local --import tsx scripts/provision-owner.ts",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
