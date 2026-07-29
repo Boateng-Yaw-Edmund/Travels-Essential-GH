@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stella | Simple is More</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "tertiary-fixed-dim": "#c4c7c8",
+                  "surface-bright": "#fcf9f8",
+                  "surface": "#fcf9f8",
+                  "on-secondary-fixed-variant": "#00458e",
+                  "tertiary-container": "#a3a7a8",
+                  "surface-container-high": "#eae7e7",
+                  "primary-fixed-dim": "#6cd6e2",
+                  "on-error": "#ffffff",
+                  "primary-container": "#47b5c1",
+                  "surface-container": "#f0eded",
+                  "primary": "#006971",
+                  "on-tertiary-fixed-variant": "#434748",
+                  "on-tertiary": "#ffffff",
+                  "primary-fixed": "#8af2ff",
+                  "on-surface": "#1c1b1b",
+                  "secondary-container": "#5c9bfe",
+                  "on-primary": "#ffffff",
+                  "on-tertiary-fixed": "#181c1d",
+                  "on-surface-variant": "#3d494a",
+                  "on-primary-container": "#004349",
+                  "on-tertiary-container": "#383d3e",
+                  "secondary": "#005cba",
+                  "on-primary-fixed": "#001f23",
+                  "outline": "#6d797b",
+                  "inverse-primary": "#6cd6e2",
+                  "background": "#fcf9f8",
+                  "inverse-on-surface": "#f3f0ef",
+                  "on-error-container": "#93000a",
+                  "surface-variant": "#e5e2e1",
+                  "surface-container-low": "#f6f3f2",
+                  "on-secondary": "#ffffff",
+                  "outline-variant": "#bdc9ca",
+                  "tertiary-fixed": "#e0e3e4",
+                  "surface-container-highest": "#e5e2e1",
+                  "surface-container-lowest": "#ffffff",
+                  "error": "#ba1a1a",
+                  "surface-tint": "#006971",
+                  "tertiary": "#5b5f60",
+                  "on-secondary-container": "#00326a",
+                  "error-container": "#ffdad6",
+                  "secondary-fixed": "#d7e3ff",
+                  "on-secondary-fixed": "#001b3f",
+                  "secondary-fixed-dim": "#abc7ff",
+                  "inverse-surface": "#313030",
+                  "on-primary-fixed-variant": "#004f56",
+                  "surface-dim": "#dcd9d9",
+                  "on-background": "#1c1b1b"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.125rem",
+                  "lg": "0.25rem",
+                  "xl": "0.5rem",
+                  "full": "0.75rem"
+          },
+          "spacing": {
+                  "margin-x": "40px",
+                  "stack-lg": "32px",
+                  "stack-sm": "8px",
+                  "section-gap": "80px",
+                  "gutter": "24px",
+                  "container-max": "1280px",
+                  "stack-md": "16px"
+          },
+          "fontFamily": {
+                  "headline-lg": ["Plus Jakarta Sans"],
+                  "body-md": ["Work Sans"],
+                  "headline-md": ["Plus Jakarta Sans"],
+                  "label-md": ["Work Sans"],
+                  "label-sm": ["Work Sans"],
+                  "body-lg": ["Work Sans"],
+                  "display-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+                  "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                  "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                  "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                  "label-md": ["14px", { "lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                  "label-sm": ["12px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                  "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                  "display-lg": ["64px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .stella-card-hover {
+      transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease;
+    }
+    .stella-card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md selection:bg-primary-fixed-dim selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30">
+<div class="max-w-container-max mx-auto px-margin-x h-20 flex justify-between items-center gap-stack-lg">
+<a class="text-headline-lg font-headline-lg font-bold text-primary shrink-0 tracking-tighter" href="#">Stella</a>
+<div class="flex-1 max-w-xl">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-12 bg-surface-container-low border-none rounded-lg pl-12 pr-4 text-label-md focus:ring-2 focus:ring-primary-container transition-all" placeholder="Search for luxury essentials..." type="text"/>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-8 px-stack-md">
+<a class="text-label-md font-label-md text-primary font-bold border-b-2 border-primary py-1" href="#">Shop</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Categories</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Deals</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Lifestyle</a>
+</nav>
+<div class="flex items-center gap-stack-md shrink-0">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-on-surface">favorite</span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-on-surface">shopping_cart</span>
+<span class="absolute top-1 right-1 w-4 h-4 bg-primary text-on-primary text-[10px] flex items-center justify-center rounded-full font-bold">2</span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface">person</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-x mt-stack-md">
+<div class="relative h-[640px] rounded-xl overflow-hidden bg-primary-container/10 flex items-center">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A high-fashion cinematic portrait of a young male model with flowing curly hair sitting on a minimalist chair. The lighting is soft and artistic, highlighting the textures of his silk striped shirt. The background is a clean, muted teal gradient creating a high-end editorial atmosphere. Elegant typography is subtly integrated into the composition." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDiwLYd91WRR4NpUDdDs3K1kD4QsNtAXCiPMdM3-igK4QOCOGBYGEvusuIiKjGNnqsRv8QTbnYk0rmFne0mfu1CiD2mvFo0qXd97I-zAHdyxIRkP95qoSVQzg7IHvubqYMiZEmu5JEJVf4z7zdYYN358K5jpj-qQjqwM62JCtUcuIDVUSl8tVjRKOSb03bC1PK3tpZZ5Qc1j3aNAIor96ENVJeWsh0xjwDZnV0ee-ONNPn8cEvaHJqM')"></div>
+</div>
+<div class="relative z-10 px-24 w-full md:w-1/2">
+<span class="text-label-md font-label-md tracking-widest text-primary uppercase mb-stack-sm block">Premium Collection</span>
+<h1 class="text-display-lg font-display-lg text-on-surface mb-stack-md leading-none">Simple <br/>is More</h1>
+<p class="text-body-lg text-on-surface-variant mb-stack-lg max-w-sm">Discover the art of minimalism with our curated collection of essential luxury pieces.</p>
+<button class="px-10 py-4 bg-primary text-on-primary font-label-md rounded-full hover:bg-on-primary-container transition-all flex items-center gap-2 group">
+            Shop Collection
+            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_right_alt</span>
+</button>
+</div>
+<div class="absolute bottom-12 right-12 text-right">
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Designed to stand out</p>
+<div class="flex gap-2 mt-4 justify-end">
+<div class="w-8 h-1 bg-primary"></div>
+<div class="w-4 h-1 bg-outline-variant"></div>
+<div class="w-4 h-1 bg-outline-variant"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Shop by Category -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap">
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface">Shop by Category</h2>
+<p class="text-on-surface-variant mt-2">Curated selections for your refined lifestyle</p>
+</div>
+<a class="text-primary font-label-md hover:underline" href="#">Explore all</a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-gutter">
+<!-- Category Items -->
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">brush</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Personal Care</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">watch</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Accessories</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">checkroom</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Coats</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">styler</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Sweat Pants</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">resume</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Perfume</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">apparel</span>
+<span class="text-label-md font-label-md text-on-surface text-center">T-Shirt</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">steps</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Sneakers</span>
+</a>
+<a class="flex flex-col items-center gap-3 p-6 bg-surface-container-lowest border border-outline-variant rounded-xl stella-card-hover group" href="#">
+<span class="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">shopping_bag</span>
+<span class="text-label-md font-label-md text-on-surface text-center">Bags</span>
+</a>
+</div>
+</section>
+<!-- New Arrivals -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap">
+<div class="flex justify-between items-center mb-stack-lg">
+<h2 class="text-headline-lg font-headline-lg text-on-surface">New Arrivals</h2>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center border border-outline-variant rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Product 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-stack-sm relative">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Studio fashion shot of a male model wearing a premium dark navy classic striped shirt. Minimalist background, high-key lighting, professional composition." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDRhMHdQt9H36emqXqKqd3UQ5YpX9xMHx1lc1Mp2OJbkEu2_P0soLbSJcVidhvAJga0Uuh3JE6OiP_MXa1rItMrcv4ZCe6_y5LcbOFhUWSE0iW-rke7rgiAtTyllqxE5xAhBVgEMiajrlffAWM9Qk-Z2cEe0_N-PpQBDkGBylFUzRjTheySHpyL3QASvkUFZQEZMjyhCRtLcbVuWKdKn_csRjvuNGABVZxP3OLxo_Z2igiLFFjpWfze')"></div>
+<button class="absolute bottom-4 right-4 w-10 h-10 bg-surface rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+<span class="absolute top-4 left-4 bg-primary text-on-primary text-label-sm px-3 py-1 rounded-full uppercase tracking-tighter">New</span>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">UNIQLO</p>
+<h3 class="text-body-md font-medium text-on-surface">Classic Striped Shirt</h3>
+<p class="text-label-sm text-primary flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Stock Available
+              </p>
+</div>
+<p class="text-headline-md font-headline-md text-primary">$40.00</p>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-stack-sm relative">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Studio fashion shot of a female model wearing a white ethereal dress. Elegant posing, minimalist background, soft lighting focused on fabric detail." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC3byX6Iu5-bXLFXbcjnHQ2-VHA5JG1KgOOYdYUe3kWjL-xhIOoLvRu4DWpYyRpoQ-gdePKQGKdHn43K_YG1L-vAdbAUfxBOO8lRvof9wNLHqkvogkkMxCh3i_tsYQfgoGijxpWO2YQItWnvRGdwZdC28ghSnotpyndUeu9scc1vLNYQgBWbwSJxl1FPk79BBhlC3x8O7wIWvPb9xGMUnguPBpEBAJDRprr7bBD5NFAbERKKca7cROk')"></div>
+<button class="absolute bottom-4 right-4 w-10 h-10 bg-surface rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">ZARA</p>
+<h3 class="text-body-md font-medium text-on-surface">Elegance White Dress</h3>
+<p class="text-label-sm text-primary flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Stock Available
+              </p>
+</div>
+<p class="text-headline-md font-headline-md text-primary">$40.00</p>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-stack-sm relative">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="A male model wearing a sharp, tailored black blazer. Modern corporate fashion, minimalist grey studio background, high contrast lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDyEOm8bIzdh2QHTHHUSr6Xr25LjxoAhE9NAD95IMDpMtSsuZOQjVoUKARvP8vBcHWxP6RbtX1Ao2hrmEFkA1d0qpGKSohMSMt15A3Ri-Rd2YE7Ptv-P_bI541mkX3ffmBHLEHDOxGFNH43SA3NnbcQaKBfRtKQduD6RBV_mSLiQKGM3lVGod56gJE9hcONrhM9PxjeZMV3_DcAYOpv9RVEOIDqo_nfBA_Ytg544OZe1wRBAOv6EcJG')"></div>
+<button class="absolute bottom-4 right-4 w-10 h-10 bg-surface rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">H&amp;M</p>
+<h3 class="text-body-md font-medium text-on-surface">4 Button Blazer</h3>
+<p class="text-label-sm text-primary flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Stock Available
+              </p>
+</div>
+<p class="text-headline-md font-headline-md text-primary">$40.00</p>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-stack-sm relative">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Trendy streetwear fashion shot of a model wearing a heavy varsity jacket. Urban aesthetic, minimalist studio setup, vibrant styling." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA322YFBFf74Obu5qHGym5BL4FmmpVya9Xw_4uoW70QiB8zsLS8srUoKlr1h-UD0gb-O082eybSyI9d91jjCL_WEBHVtq6zVqnTtyW74onTciGKddcD7tHLEyZ5Q5jM0j2suU4UL-lXRKpi2-8kvAiaDgcgeghKe43COdvAmcB9JeGNaiOw1N6rxfWZ-YETWYxwNlOrG_w_r8oZdKAoqe6yvlc9DOQvCxeQn9BkG4ZvRpq2-DVMSC7S')"></div>
+<button class="absolute bottom-4 right-4 w-10 h-10 bg-surface rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">UNIQLO</p>
+<h3 class="text-body-md font-medium text-on-surface">Varsity Jacket</h3>
+<p class="text-label-sm text-primary flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Stock Available
+              </p>
+</div>
+<p class="text-headline-md font-headline-md text-primary">$40.00</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Promotional Banners -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter h-[500px]">
+<!-- Left Banner -->
+<div class="relative rounded-xl overflow-hidden group bg-primary-container">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-right" data-alt="A cheerful young woman carrying multiple designer shopping bags and boxes, smiling at the camera. Minimalist teal background with abstract geometric shapes. Fresh, energetic, high-end e-commerce style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuATT8zFbIIwrFmZS5cUWbOoQopSZ0SQqT3wtiK4wyzTBGNpzbd93JzElZGzMCEHXP8PQGkpWA0WKee8n8SoOfYvsev4YOQEQPndpIit1KYBVaFdx7GO1iD95rGLUn5KCe90-YI7LcdPOKGU1riEU9G-laPk3Zr9KoExAuaH5l9Jkg6qk3jYm6mh0NDwuJ3cN1VOk2i-qZ4r6txWM3ahLVUXv5Cju8edXv4V4k4NnZ832YhYanseRgJv')"></div>
+</div>
+<div class="relative z-10 p-12 flex flex-col justify-center h-full max-w-sm">
+<h3 class="text-display-lg font-display-lg text-on-primary leading-tight mb-stack-md">Your Style, Delivered.</h3>
+<p class="text-on-primary/80 mb-stack-lg">Exclusively online. High-quality essentials curated for the modern minimalist.</p>
+<div class="mt-auto">
+<span class="text-label-sm text-on-primary/60 font-label-sm tracking-widest">WWW.STELLA.COM</span>
+</div>
+</div>
+</div>
+<!-- Right Column Banners -->
+<div class="grid grid-rows-2 gap-gutter h-full">
+<div class="bg-surface-container-low rounded-xl flex items-center px-12 overflow-hidden relative group">
+<div class="flex-1">
+<p class="text-label-sm text-on-surface-variant uppercase tracking-widest mb-1">Timeless Elegance</p>
+<h4 class="text-headline-md font-headline-md text-on-surface mb-stack-md">Discover our accessories collection</h4>
+<button class="px-6 py-2 bg-primary-container text-on-primary-container font-label-md rounded-full hover:shadow-lg transition-all">Shop Now</button>
+</div>
+<div class="w-1/3 flex justify-center translate-x-4 group-hover:scale-110 transition-transform duration-500">
+<div class="w-48 h-48 bg-contain bg-no-repeat bg-center" data-alt="A sleek black high-end smartwatch displayed on a plain white studio background. The screen shows a vibrant golden organic visualization. Minimalist product photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBhLRYF-5bi6xDjVfUpc5sfLzHbA5A4c1d5qxkCYQkNtbOYU_iu5GkQdJ9LSp4uFEJ9uxrYIhC_db2u27Lu6M4JPTXL4l7HdHGHa_Ag0lLeKss8bqRxHgbGlk_ev7RuGmCLfj4Knj4aoGO6w45fdzV5CrGdRI7ieYX0xzGXACTBn2zYPuqwYf9xweKoj3Hg1z9gLLKKp1Obw8UIIEiAwHV6xqG36uhxGx7qYXZDUa_uZqPnD0tQYWbc')"></div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl flex items-center px-12 overflow-hidden relative group">
+<div class="flex-1">
+<p class="text-label-sm text-on-surface-variant uppercase tracking-widest mb-1">Find your perfect pair</p>
+<h4 class="text-headline-md font-headline-md text-on-surface mb-stack-md">Explore our shoes collection</h4>
+<button class="px-6 py-2 bg-primary-container text-on-primary-container font-label-md rounded-full hover:shadow-lg transition-all">Shop Now</button>
+</div>
+<div class="w-1/3 flex justify-center translate-x-4 group-hover:scale-110 transition-transform duration-500">
+<div class="w-48 h-48 bg-contain bg-no-repeat bg-center" data-alt="A side view of a minimalist white and orange designer running shoe floating in mid-air. Clean, studio lighting, crisp details, high-end e-commerce photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0LxLxu5MYyyUC8rf_QmNWKe5CeJUXzt7gCraMzChTzu3Dlk7fb_pg67Zs8bmA4zl8i_YmKnCnVeLD93J6wcgfC06dP0CUrKyLfIOXS-4TXIDh0Qkz1JB62_Ad9gfoxSJfrByrBhJQNz9QDF5TEx4Imm22QJRMVmiQJUv0EztFtJp3wKpy6QPSru-JeKfIAWF75HARrm4QOrNMemy4wQxFbZJ61eU1t-CHj4ta8igfdBklQlvfvNtP')"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Deals -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap">
+<h2 class="text-headline-lg font-headline-lg text-on-surface mb-stack-lg">Featured Deals</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="bg-secondary p-12 rounded-xl flex items-center text-on-secondary overflow-hidden group">
+<div class="flex-1">
+<h3 class="text-headline-lg font-headline-lg mb-stack-sm">Indulge in exclusive deals</h3>
+<p class="mb-stack-lg opacity-80">Shop now and enjoy our latest fashion finds with limited time offers.</p>
+<button class="px-8 py-3 bg-on-secondary text-secondary font-label-md rounded-full hover:bg-on-secondary-fixed-variant hover:text-on-secondary transition-all">Shop Now</button>
+</div>
+<div class="w-1/2 -mr-12 -mb-12 translate-y-8 group-hover:translate-y-4 transition-transform duration-500">
+<div class="w-full h-80 bg-cover bg-center rounded-tl-3xl shadow-2xl" data-alt="A stylish woman in a dark coat and red sunglasses walking with luxury shopping bags against a bright blue architectural background. Dynamic fashion photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsEjnYBe-Cby2WTzsVzyDBdemc3kcue1Waux_SlpPzPALVrQUD8aBpTky0PDdQ-IWTKRpNwKKB5xVnUNDamlvzbvAOHp-erItof6YphCMnkZ5joY_sVwlEc1taSRtXitD4Ci5T2-vXUY-fzGRUKVz6wv9vXlJCvxEkhZoDQpenwMEj6oeEpBqIoQ4SdQlrEpOTL7CUwMUSPMhZyNYiEJK7yQqBd8X6ZhUUuS8rqC30KcTFbD7-Q2A3')"></div>
+</div>
+</div>
+<div class="bg-primary-container p-12 rounded-xl flex items-center text-on-primary-container overflow-hidden group">
+<div class="flex-1 relative z-10">
+<h3 class="text-headline-lg font-headline-lg mb-stack-sm">Welcome offer just for you</h3>
+<p class="mb-stack-lg opacity-80">Enjoy a special discount on your first purchase. Join the Stella community today.</p>
+<button class="px-8 py-3 bg-secondary-container text-on-secondary-container font-label-md rounded-full hover:shadow-lg transition-all">Get discount</button>
+</div>
+<div class="w-1/3 flex justify-center group-hover:rotate-12 transition-transform duration-500">
+<div class="w-48 h-48 bg-contain bg-no-repeat bg-center drop-shadow-2xl" data-alt="A high-end orange gift box with a delicate red ribbon, isolated on a clean, soft teal background. Professional product shot for marketing." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBmDS5QPWIY_aIRgFkzrfvR7q80aKXqSQkDo3tsX2tpuHfk9wf-Iy1N9egggru7m0ZdNZjhJaWkBpAha1OMK9dIilJgG8FmdHuUJQDuiclRDCb8soLJkwwWLU81iJvtmD_NMaT3hO_3h3HaUGSvKmsmKuj1daUXuzSdNZ_Pe9oRBG8jDjcrVuJ6IBuseknwc728PcvuujbO8QnIMiSWyDGiuX3OB1Qz7idVlMPrFgNVrrq_0oONsqMB')"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Brand Logos -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap border-t border-b border-outline-variant/30">
+<div class="flex justify-between items-center mb-stack-lg">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Shop by Brands</h3>
+<a class="text-primary font-label-md hover:underline" href="#">See all</a>
+</div>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-gutter">
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-24 h-12 bg-contain bg-no-repeat bg-center" data-alt="The Hermes logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBY6-HaEKsK1vR6ye7z-c3bJZicwjdnynYRf1S3-z20A-cv7Vyma8MSli2UN8XY5CdfmAOZY_K_WP9lUlpynl2RnGv1bstrTsXbmjG7xNvCT29I-G9kGGsJOIP95Rmx4wDy_ijAxY-CT-Tb2DhZvSNSZgSwLo7c4kl5zlcBgRWEeTR927zIn6IOVYKpUoUvFH2dyw1fYsMO6HtcuxWTb7k_8ZVjIcQiguIXTswC3OeQQ9jkMF-kKC3')"></div>
+</div>
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-20 h-10 bg-contain bg-no-repeat bg-center" data-alt="The Nike swoosh logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwJt34LCbM0FAQW7oO51wkWfU1mg3SJ7qKSHb6g3oQBYkKxKs7WUws0u02GyuqI3zHCey9t1oBxKeasJYe-XohHau1rwvianciPwShbcOyPs20_anCBFJSxb9ZXZCdCHQI_0Op3Zvr9YQ871gzO8SXo_z4ud7eQq_PKS8lI3y3VhNKkzkpI-UHrkLzYoLICxUH5CCMbs9P0ViaANt83CKtisBIG8yL8rJ7P27JoAVwr1wr3A31zKtF')"></div>
+</div>
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-20 h-10 bg-contain bg-no-repeat bg-center" data-alt="The New Balance logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDgjTOoKRtvFZBzRooUD5mqKtgQVp9oA1262Bed9FHMZJu0Blh_RO3VlH7yX83Lqx4ugzJIt-co4xJZcpsxNaHkaStetJaLncxOosOmJqQoB_BNyIqXFM8YxK1p87Lh3tgjlg9tTG3WbPwoc75o6Dk_zJeKuds8kbi0LZfbuJEqPTsxg5dosOqwkZbUqQUA8s4xjmeMwbu3hnbWfD848zJBpQ6P7wOhOXeByVMyxf8AyyHUtXWKtvu3')"></div>
+</div>
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-20 h-10 bg-contain bg-no-repeat bg-center" data-alt="The Puma leaping cat logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDkPLCzPR0z-uVZSCVwSqIqMMejv6CUSj0Ndmw5opSUvq6GQebwDiCcoLX8JDLa4QsvuWU1NY53vVH1k6cM6r3T4tqZUVa2Gap1HjekfqzBcS5uHORkicLRjyMgp00ktLg8Y8V1M9YYMwvHO0bGf11GbfEIBTUMkGJkmW0ssHtSWlRNneYbhr9y46fmRKSFCaBY6nFckVbtbBrKGoANPoIUE3D2WvjwXeqjwOI_kQ-j0bmtIv7in7kK')"></div>
+</div>
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-16 h-8 bg-contain bg-no-repeat bg-center" data-alt="The Uniqlo logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC-Iup53WUWhXGqVZIj4k8mWP2u2GXBon4jnspGxelusWueumu7pnnaQXHycFnLx4TaG2bNYWYeGMa6I2fldQPoUOPk1Kg9nSEEx88mX-tiBTNI9LmlnMfwySRTWO12e-T1PUvDRnMWOM6H2Jjd8448yl_iLUq6heFJOJSrQ4_b8YAMn0ls5Cy2cJhiopNwQbMuj25fyOI_B10zRL_y5e3-bCdKJxvhS1zTI57BxwY9U0Tf81oDLKt4')"></div>
+</div>
+<div class="h-20 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 border border-outline-variant/30 rounded-lg bg-surface">
+<div class="w-20 h-10 bg-contain bg-no-repeat bg-center" data-alt="The Zara logo in a clean, minimalist professional format. Simple black and white execution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDeJEMOlKGYPqz-xyTqPD1rzBpSHbhI9dWpobKfnU357ZPFgvXLIGAXiKylUemIqNLrxoi2XMB8ptHm_Ei9VzWuAjiVDqNXTzqS8ZNlIuOaxixxlFwF-LvBG5e6CLSppQdUZK0DmAYwKRCBrZXPQDsxABL47I1v5QqqRRW-zQ3f0UuGg7M5d6baMPnOEUnB1zhvXtkp87tghKKtj-TujouOT248J-QqKBkj9J6NUMkdGZTE-UD8C6oo')"></div>
+</div>
+</div>
+</section>
+<!-- Recent Posts -->
+<section class="max-w-container-max mx-auto px-margin-x py-section-gap">
+<h2 class="text-headline-lg font-headline-lg text-on-surface mb-stack-lg">Recent Post</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<article class="relative group h-[500px] rounded-2xl overflow-hidden cursor-pointer">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" data-alt="Cinematic fashion editorial of two models in athletic streetwear. Moody lighting, high-contrast, artistic composition with a focus on urban lifestyle and active wear textures." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCVQm3QxhBcIZV6uMkJY0_X2bxfmRkeS8wtQUSXmQRQEgjzxSvJJZ9E_rG-07Mw07Uja4UThUgRaSvzf87MZXJ8TvgtJvGzg4--0xsNhSMyogFVECMWLdEbu5YNEkM1yB2TIQ01aR2jAM9SZhWtyYli8eQCtDSjZ-wcsgoUqPcXytkdC72bQwcivp9emKIfCa1g6CqZlGV-i86GqMjyFp0MTBdeaR3BfE3_RT3x-fFW_7XyohHHfe0J')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+</div>
+<div class="relative z-10 h-full p-12 flex flex-col justify-end">
+<span class="bg-white/20 backdrop-blur-md text-white text-label-sm px-4 py-1 rounded-full w-fit mb-4">Outfit</span>
+<h3 class="text-display-lg font-display-lg text-white max-w-md leading-tight group-hover:text-primary-fixed transition-colors">Trendy athletic outfits for active lifestyles</h3>
+</div>
+</article>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<article class="relative group rounded-2xl overflow-hidden cursor-pointer h-full">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" data-alt="High-fashion silhouette of a woman in contemporary clothing against a minimalist studio background. Monochrome aesthetic, moody and elegant." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDpi2ui0m4FQE_5qW7rDsGFg-OWiY3ajehGwcNXCbelDsLFEnDXt9ZFM8U-Nme5KyMIMrGGb5tYJoAGrBCow4xeJsyMPcd316jNEjEaLrNuq6Aofars6Uadi5m3zP09Oina7JTWOzruej33Yb2duEXyNSvGoe4HtrN0w3IAcv5wCTlDNt4TVnenyRs0IWqH4FjOxaGBwEomNykeOvN69667xFElL8j5y8VCDlqvsqaQT7uVYQE2Crn5')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+</div>
+<div class="relative z-10 h-full p-8 flex flex-col justify-end">
+<span class="bg-white/20 backdrop-blur-md text-white text-label-sm px-4 py-1 rounded-full w-fit mb-3">Outfit</span>
+<h3 class="text-headline-md font-headline-md text-white leading-tight">Modern fashion for the contemporary woman</h3>
+</div>
+</article>
+<div class="flex flex-col gap-gutter">
+<div class="flex-1 bg-surface-container-low rounded-2xl p-8 flex flex-col justify-center border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<span class="text-label-sm text-primary uppercase tracking-widest mb-2">Style Guide</span>
+<h4 class="text-headline-md font-headline-md text-on-surface mb-stack-sm">10 essential pieces for every minimalist wardrobe</h4>
+<p class="text-on-surface-variant text-body-md line-clamp-2">Learn how to build a timeless collection that speaks volumes with simplicity.</p>
+</div>
+<div class="flex-1 bg-surface-container-low rounded-2xl p-8 flex flex-col justify-center border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<span class="text-label-sm text-primary uppercase tracking-widest mb-2">Lifestyle</span>
+<h4 class="text-headline-md font-headline-md text-on-surface mb-stack-sm">The art of living simple in a complex world</h4>
+<p class="text-on-surface-variant text-body-md line-clamp-2">Expert tips on curation, minimalism, and intentional living.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Support Bar -->
+<section class="bg-surface-container-low py-12 border-t border-outline-variant/30">
+<div class="max-w-container-max mx-auto px-margin-x flex flex-wrap justify-between items-center gap-stack-lg">
+<div>
+<h4 class="text-headline-md font-headline-md text-on-surface">We're always here to help</h4>
+<p class="text-on-surface-variant">You can get help by choosing from any of these options</p>
+</div>
+<div class="flex flex-wrap gap-stack-lg">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">help</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Help Center</p>
+<p class="text-label-md font-bold text-on-surface">help.stella.com</p>
+</div>
+</div>
+<div class="flex items-center gap-3 border-l border-outline-variant/30 pl-8">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">call</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Phone</p>
+<p class="text-label-md font-bold text-on-surface">+966597014780</p>
+</div>
+</div>
+<div class="flex items-center gap-3 border-l border-outline-variant/30 pl-8">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Email Support</p>
+<p class="text-label-md font-bold text-on-surface">online@stella.com</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low py-stack-lg px-margin-x max-w-container-max mx-auto mt-section-gap">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack-lg">
+<div class="col-span-1 md:col-span-1">
+<a class="text-headline-md font-headline-md font-bold text-primary mb-6 block" href="#">Stella</a>
+<p class="text-on-surface-variant text-body-md mb-6 max-w-xs">Elevating your lifestyle through minimalist design and premium quality essentials since 2024.</p>
+<div class="flex gap-4">
+<a class="w-32 h-10 bg-on-surface rounded-lg flex items-center justify-center" href="#">
+<div class="w-24 h-6 bg-contain bg-no-repeat bg-center" data-alt="Apple App Store download button in minimalist black style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCxL-wDEXrsUuufZNhaDXD1VdnO_6tIltHBYODPILCZcD1W3pojZKNUZMiu3huPM6P8yg1-eUstO_37Nxb5uYnfVll3JY_-a7OWitk71iL6ICF8UPw8dl3QMzD7m-Dr78TBRjAWgenPmoxPVONme4c6qWE4nHNgceIwqvxMCEbZhJ8xiARUjvFl1BK1EVtVT3gBZKDxVy0Vw-7wlX_Qtrx6gaeTMU_6KAEc36UmnwmbuJ6IyUaQ-RYU')"></div>
+</a>
+<a class="w-32 h-10 bg-on-surface rounded-lg flex items-center justify-center" href="#">
+<div class="w-24 h-6 bg-contain bg-no-repeat bg-center" data-alt="Google Play Store download button in minimalist black style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCV5H4fwlQgWmJTHSsdwMUVbJQtjF3os5qEGSccSAnNqg7xUg1C836eFzCkgIuHyIaFwt8jKn1pAFpVPO1WYrrQBHRQ8-EEfBrJguHGWn3oeaohd1Fm9BrbOd38Mn2V_DxW_OI4UACyqI5BknOXwefWsd4T56w6N9hpKnp5EhxNdrgXtdXMJEV2Z7XVwMpgf8dYwDBkT3MklF6SrSXruCseBFQ4RMckg1aM-AHHRzYmniTE9Nwz4xNL')"></div>
+</a>
+</div>
+</div>
+<div>
+<h5 class="text-label-md font-bold text-on-surface uppercase mb-6 tracking-widest">Menu</h5>
+<ul class="space-y-3">
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Shop</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">New Arrivals</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Trending</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Lifestyle</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-label-md font-bold text-on-surface uppercase mb-6 tracking-widest">Support</h5>
+<ul class="space-y-3">
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Help Center</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Returns &amp; Refunds</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Shipping Info</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-colors text-label-md" href="#">Contact Us</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-label-md font-bold text-on-surface uppercase mb-6 tracking-widest">Connect</h5>
+<p class="text-on-surface-variant text-body-md mb-6">Subscribe to our newsletter for early access and styling tips.</p>
+<div class="flex gap-stack-sm mb-6">
+<input class="bg-surface border border-outline-variant rounded-lg px-4 flex-1 text-label-md focus:ring-primary" placeholder="Email address" type="email"/>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-lg font-label-md">Join</button>
+</div>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-primary" href="#"><span class="material-symbols-outlined">brand_family</span></a>
+<a class="text-on-surface-variant hover:text-primary" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-on-surface-variant hover:text-primary" href="#"><span class="material-symbols-outlined">play_circle</span></a>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-outline-variant/30 flex flex-col md:flex-row justify-between items-center gap-4 text-label-sm text-on-surface-variant">
+<p>© 2024, Stella. All right reserved.</p>
+<div class="flex gap-8">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Shipping Info</a>
+<a class="hover:text-primary transition-colors" href="#">Returns</a>
+<a class="hover:text-primary transition-colors" href="#">Cookies</a>
+</div>
+</div>
+</footer>
+<script>
+    // Micro-interactions and subtle scroll effects
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('header');
+      if (window.scrollY > 20) {
+        header.classList.add('shadow-sm');
+      } else {
+        header.classList.remove('shadow-sm');
+      }
+    });
+
+    // Add staggered entrance animations to cards
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.stella-card-hover');
+      cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          card.style.transition = 'all 0.6s cubic-bezier(0.2, 0, 0, 1)';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100 + (index * 50));
+      });
+    });
+  </script>
+</body></html>
