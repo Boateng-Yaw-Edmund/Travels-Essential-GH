@@ -3,6 +3,7 @@ dist/
 coverage/
 playwright-report/
 test-results/
+.neon
 *.local
 *.tsbuildinfo
 debug.log

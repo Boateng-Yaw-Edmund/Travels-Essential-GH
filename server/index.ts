@@ -3,10 +3,14 @@ import 'dotenv/config'
 import { createServerApp } from './app'
 import { createAuthHandlers } from './auth/handlers'
 import { validateAuthEnv } from './config/env'
+import { createDatabaseClient } from './db/client'
+import { validateDatabaseEnv } from './db/env'
+import { createAdminRepository } from './neon/admin-repository'
+import { createNeonAuthGateway } from './neon/auth-gateway'
 import { FixedWindowRateLimiter } from './security/fixed-window-rate-limiter'
-import { createSupabaseAuthGateway } from './supabase/auth-gateway'
 
 const environment = validateAuthEnv(process.env)
+const databaseEnvironment = validateDatabaseEnv(process.env)
 if (process.env.NODE_ENV === 'production') {
   throw new Error(
     'Production startup requires a shared rate limiter; the local runtime is development-only.',
@@ -15,9 +19,11 @@ if (process.env.NODE_ENV === 'production') {
 const runtimeEnvironment =
   process.env.NODE_ENV === 'test' ? 'test' : 'development'
 const rateLimiter = new FixedWindowRateLimiter(runtimeEnvironment)
-const gateway = createSupabaseAuthGateway({
-  supabaseUrl: environment.supabaseUrl,
-  supabaseAnonKey: environment.supabaseAnonKey,
+const database = createDatabaseClient(databaseEnvironment.pooledUrl)
+const adminRepository = createAdminRepository(database)
+const gateway = createNeonAuthGateway({
+  authBaseUrl: environment.neonAuthBaseUrl,
+  isActiveAdmin: adminRepository.isActiveAdmin,
 })
 const handlers = createAuthHandlers({
   gateway,

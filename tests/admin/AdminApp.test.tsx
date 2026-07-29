@@ -131,38 +131,16 @@ describe('admin authentication and dashboard shell', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('uses the CSRF cookie to refresh an expired access session once', async () => {
+  it('does not make a second request after Neon rejects a session', async () => {
     window.history.replaceState({}, '', '/admin')
-    document.cookie = 'tegh_csrf=refresh-csrf-token; Path=/'
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
-      if (input === '/api/admin/auth/session') {
-        return jsonResponse({ authenticated: false }, 401)
-      }
-
-      if (input === '/api/admin/auth/refresh') {
-        return jsonResponse({
-          data: {
-            user: { id: 'admin-1', email: 'owner@example.com' },
-            csrfToken: 'rotated-csrf-token',
-          },
-        })
-      }
-
-      throw new Error(`Unexpected request: ${String(input)}`)
-    })
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockReturnValue(jsonResponse({ authenticated: false }, 401))
 
     render(<AdminApp />)
 
-    expect(await screen.findByRole('heading', { name: /store overview/i })).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      '/api/admin/auth/refresh',
-      expect.objectContaining({
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'X-CSRF-Token': 'refresh-csrf-token' },
-      }),
-    )
+    expect(await screen.findByRole('heading', { name: /admin sign in/i })).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('redirects an unauthenticated protected route to login', async () => {

@@ -1,26 +1,40 @@
 # Travel Essentials GH
 
-A responsive storefront with the first production-commerce foundation: an
-invite-only admin login and dashboard backed by Supabase Auth and PostgreSQL
-row-level security. Product, inventory, order, and payment modules are being
+A responsive storefront with the first production-commerce foundation. The
+development environment is linked to Neon Postgres and Neon Auth. The admin
+gateway uses Neon Auth bearer sessions and checks the managed Neon Auth admin
+role in Postgres. Product, inventory, order, and payment modules are being
 added in separate phases.
 
-## Configure the admin foundation
+## Neon development setup
 
-1. Create a Supabase project.
-2. Copy `.env.example` to `.env.local`.
-3. Add the project URL and publishable/anon key to `.env.local`.
-4. Apply `supabase/migrations/202607280001_admin_auth_foundation.sql`.
-5. Create the owner in Supabase Auth, then add the matching user ID to
-   `public.admin_profiles`.
+The repository is linked locally to the `development` branch of the
+`Travels-Essential-GH` Neon project. `.neon` and `.env.local` are intentionally
+Git-ignored because they contain workspace context and credentials.
 
-There is no public admin registration route. Never place a Supabase secret or
-service-role key in a `VITE_*` variable or commit `.env.local`.
+After cloning on another computer:
+
+```bash
+npx neon@latest auth
+npx neon@latest link
+npx neon@latest checkout development
+npm install
+npm run db:check
+```
+
+`DATABASE_URL` is the pooled runtime connection. `DATABASE_URL_UNPOOLED` is
+reserved for schema migrations and administrative tasks. Never expose either
+value through a `VITE_*` variable or commit `.env.local`.
+
+Create the owner through Neon Auth, then assign that user the `admin` role.
+There is no public admin-registration route in this application. The API also
+rejects banned users even if their Neon Auth session remains valid.
 
 ## Run locally
 
 ```bash
 npm install
+npm run db:check
 npm run dev
 ```
 
@@ -48,14 +62,17 @@ npm run test:e2e
 - Newsletter form validation
 - Generated, project-local hero and product imagery
 - Secure admin login with `HttpOnly` authentication cookies
-- Origin and CSRF protection, login rate limiting, and RLS migration
+- Origin and CSRF protection plus login and session rate limiting
+- Neon Auth bearer-session gateway with Postgres-backed admin authorization
+- Neon development branch with cost-limited autoscaling
+- Validated pooled Neon/Drizzle database adapter
 - Route-split storefront and admin bundles
 
 ## Egress controls
 
 - The admin restores its session once and never polls.
-- Session refresh occurs only after the short-lived access session expires.
-- Admin membership checks select one column and one row.
+- Session renewal is user-triggered and the dashboard never polls.
+- Admin membership checks use one indexed identity lookup.
 - Storefront and admin code/styles are separate bundles.
 - Product media will use a public CDN bucket, immutable URLs, long browser
   caching, thumbnails/list images, and display-sized WebP/AVIF assets.

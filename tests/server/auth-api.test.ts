@@ -9,9 +9,10 @@ import type {
   RateLimiter,
 } from '../../server/auth/types'
 
+const sessionToken = ['session', 'token'].join('-')
+
 const session: AuthSession = {
-  accessToken: 'access-token',
-  refreshToken: 'refresh-token',
+  token: sessionToken,
   expiresInSeconds: 3600,
   user: {
     id: '5be1673a-0af7-4b21-b029-13059436c84f',
@@ -22,8 +23,7 @@ const session: AuthSession = {
 function createGateway(overrides: Partial<AuthGateway> = {}): AuthGateway {
   return {
     signInWithPassword: vi.fn().mockResolvedValue(session),
-    refreshSession: vi.fn().mockResolvedValue(session),
-    getUser: vi.fn().mockResolvedValue(session.user),
+    getSession: vi.fn().mockResolvedValue(session),
     isActiveAdmin: vi.fn().mockResolvedValue(true),
     signOut: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -77,7 +77,7 @@ function createResponse(): ExpressResponseLike & {
 }
 
 describe('admin auth handlers', () => {
-  it('logs in an invited admin and stores tokens in secure httpOnly cookies', async () => {
+  it('logs in an admin and stores the session in a secure httpOnly cookie', async () => {
     const gateway = createGateway()
     const handlers = createAuthHandlers({
       gateway,
@@ -109,10 +109,7 @@ describe('admin auth handlers', () => {
     expect(response.responseHeaders['Set-Cookie']).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /^tegh_access=access-token; Path=\/api\/admin; HttpOnly; Secure; SameSite=Strict;/,
-        ),
-        expect.stringMatching(
-          /^tegh_refresh=refresh-token; Path=\/api\/admin\/auth; HttpOnly; Secure; SameSite=Strict;/,
+          /^tegh_session=session-token; Path=\/api\/admin; HttpOnly; Secure; SameSite=Strict;/,
         ),
         expect.stringMatching(
           /^tegh_csrf=csrf-token; Path=\/; Secure; SameSite=Strict;/,
@@ -219,7 +216,7 @@ describe('admin auth handlers', () => {
     expect(gateway.signInWithPassword).not.toHaveBeenCalled()
   })
 
-  it('returns the current active admin from an access cookie', async () => {
+  it('returns the current active admin from a session cookie', async () => {
     const gateway = createGateway()
     const handlers = createAuthHandlers({
       gateway,
@@ -231,7 +228,7 @@ describe('admin auth handlers', () => {
     await handlers.session(
       createRequest({
         headers: {
-          cookie: 'tegh_access=access-token; tegh_csrf=csrf-token',
+          cookie: 'tegh_session=session-token; tegh_csrf=csrf-token',
         },
       }),
       response,
@@ -241,7 +238,7 @@ describe('admin auth handlers', () => {
     expect(response.payload).toEqual({
       data: { user: session.user, csrfToken: 'csrf-token' },
     })
-    expect(gateway.getUser).toHaveBeenCalledWith('access-token')
+    expect(gateway.getSession).toHaveBeenCalledWith('session-token')
   })
 
   it('requires a matching double-submit token to log out', async () => {
@@ -257,8 +254,7 @@ describe('admin auth handlers', () => {
       createRequest({
         headers: {
           origin: 'https://shop.example.com',
-          cookie:
-            'tegh_access=access-token; tegh_csrf=cookie-token; tegh_refresh=refresh-token',
+          cookie: 'tegh_session=session-token; tegh_csrf=cookie-token',
           'x-csrf-token': 'different-token',
         },
       }),
@@ -282,8 +278,7 @@ describe('admin auth handlers', () => {
       createRequest({
         headers: {
           origin: 'https://shop.example.com',
-          cookie:
-            'tegh_access=access-token; tegh_csrf=csrf-token; tegh_refresh=refresh-token',
+          cookie: 'tegh_session=session-token; tegh_csrf=csrf-token',
           'x-csrf-token': 'csrf-token',
         },
       }),
@@ -291,20 +286,17 @@ describe('admin auth handlers', () => {
     )
 
     expect(response.statusCode).toBe(200)
-    expect(gateway.signOut).toHaveBeenCalledWith('access-token')
+    expect(gateway.signOut).toHaveBeenCalledWith('session-token')
     expect(response.responseHeaders['Set-Cookie']).toEqual(
       expect.arrayContaining([
-        expect.stringMatching(/^tegh_access=;/),
-        expect.stringMatching(/^tegh_refresh=;/),
+        expect.stringMatching(/^tegh_session=;/),
         expect.stringMatching(/^tegh_csrf=;/),
       ]),
     )
   })
 
-  it('refreshes a session only through protected POST semantics', async () => {
-    const gateway = createGateway({
-      getUser: vi.fn().mockResolvedValue(null),
-    })
+  it('renews a session only through protected POST semantics', async () => {
+    const gateway = createGateway()
     const handlers = createAuthHandlers({
       gateway,
       rateLimiter: createLimiter(),
@@ -317,8 +309,7 @@ describe('admin auth handlers', () => {
       createRequest({
         headers: {
           origin: 'https://shop.example.com',
-          cookie:
-            'tegh_access=expired; tegh_refresh=refresh-token; tegh_csrf=old-token',
+          cookie: 'tegh_session=session-token; tegh_csrf=old-token',
           'x-csrf-token': 'old-token',
         },
       }),
@@ -326,7 +317,7 @@ describe('admin auth handlers', () => {
     )
 
     expect(response.statusCode).toBe(200)
-    expect(gateway.refreshSession).toHaveBeenCalledWith('refresh-token')
+    expect(gateway.getSession).toHaveBeenCalledWith('session-token')
     expect(response.payload).toEqual({
       data: {
         user: session.user,
@@ -336,10 +327,9 @@ describe('admin auth handlers', () => {
     expect(response.responseHeaders['Set-Cookie']).toBeDefined()
   })
 
-  it('expires only the access cookie so the protected refresh can run', async () => {
+  it('expires an invalid session cookie', async () => {
     const gateway = createGateway({
-      getUser: vi.fn().mockResolvedValue(null),
-      refreshSession: vi.fn().mockResolvedValue(null),
+      getSession: vi.fn().mockResolvedValue(null),
     })
     const handlers = createAuthHandlers({
       gateway,
@@ -350,22 +340,22 @@ describe('admin auth handlers', () => {
 
     await handlers.session(
       createRequest({
-        headers: { cookie: 'tegh_refresh=invalid-refresh' },
+        headers: { cookie: 'tegh_session=invalid-session' },
       }),
       response,
     )
 
     expect(response.statusCode).toBe(401)
-    expect(gateway.refreshSession).not.toHaveBeenCalled()
+    expect(gateway.getSession).toHaveBeenCalledWith('invalid-session')
     expect(response.responseHeaders['Set-Cookie']).toEqual([
-      expect.stringMatching(/^tegh_access=;.*Max-Age=0/),
+      expect.stringMatching(/^tegh_session=;.*Max-Age=0/),
     ])
   })
 
   it('uses generic service errors when the auth provider is unavailable', async () => {
     const gateway = createGateway({
       signInWithPassword: vi.fn().mockRejectedValue(new Error('private detail')),
-      getUser: vi.fn().mockRejectedValue(new Error('private detail')),
+      getSession: vi.fn().mockRejectedValue(new Error('private detail')),
     })
     const handlers = createAuthHandlers({
       gateway,
@@ -382,7 +372,7 @@ describe('admin auth handlers', () => {
       loginResponse,
     )
     await handlers.session(
-      createRequest({ headers: { cookie: 'tegh_access=access-token' } }),
+      createRequest({ headers: { cookie: 'tegh_session=session-token' } }),
       sessionResponse,
     )
 
@@ -406,7 +396,7 @@ describe('admin auth handlers', () => {
         headers: {
           Origin: ['https://shop.example.com'],
           Cookie:
-            'tegh_access=access-token; tegh_csrf=csrf-token; broken=%E0%A4%A',
+            'tegh_session=session-token; tegh_csrf=csrf-token; broken=%E0%A4%A',
           'X-CSRF-Token': 'csrf-token',
         },
         ip: undefined,

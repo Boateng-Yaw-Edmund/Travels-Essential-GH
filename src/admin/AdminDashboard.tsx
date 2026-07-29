@@ -97,7 +97,7 @@ export default function AdminDashboard({ user, csrfToken, onSignedOut }: AdminDa
           <h2 id="data-use-title">Lean data use by design</h2>
           <p>
             Dashboard data will load on demand and use compact summaries. Product images will use
-            resized formats and browser caching to keep Supabase egress under control.
+            resized formats and browser caching to keep media egress under control.
           </p>
         </section>
       </main>

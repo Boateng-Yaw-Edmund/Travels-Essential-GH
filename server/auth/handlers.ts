@@ -1,6 +1,5 @@
 import { AUTH_COOKIES, parseCookies, serializeCookie } from './cookies'
 import type {
-  AdminUser,
   AuthGateway,
   AuthSession,
   ExpressRequestLike,
@@ -128,17 +127,11 @@ function authCookies(
   secure: boolean,
 ): string[] {
   return [
-    serializeCookie(AUTH_COOKIES.access, session.accessToken, {
+    serializeCookie(AUTH_COOKIES.session, session.token, {
       httpOnly: true,
       secure,
       maxAgeSeconds: session.expiresInSeconds,
       path: '/api/admin',
-    }),
-    serializeCookie(AUTH_COOKIES.refresh, session.refreshToken, {
-      httpOnly: true,
-      secure,
-      maxAgeSeconds: 30 * 24 * 60 * 60,
-      path: '/api/admin/auth',
     }),
     serializeCookie(AUTH_COOKIES.csrf, csrfToken, {
       httpOnly: false,
@@ -151,17 +144,11 @@ function authCookies(
 
 function expiredCookies(secure: boolean): string[] {
   return [
-    serializeCookie(AUTH_COOKIES.access, '', {
+    serializeCookie(AUTH_COOKIES.session, '', {
       httpOnly: true,
       secure,
       maxAgeSeconds: 0,
       path: '/api/admin',
-    }),
-    serializeCookie(AUTH_COOKIES.refresh, '', {
-      httpOnly: true,
-      secure,
-      maxAgeSeconds: 0,
-      path: '/api/admin/auth',
     }),
     serializeCookie(AUTH_COOKIES.csrf, '', {
       httpOnly: false,
@@ -172,8 +159,8 @@ function expiredCookies(secure: boolean): string[] {
   ]
 }
 
-function expiredAccessCookie(secure: boolean): string {
-  return serializeCookie(AUTH_COOKIES.access, '', {
+function expiredSessionCookie(secure: boolean): string {
+  return serializeCookie(AUTH_COOKIES.session, '', {
     httpOnly: true,
     secure,
     maxAgeSeconds: 0,
@@ -183,11 +170,11 @@ function expiredAccessCookie(secure: boolean): string {
 
 async function activeAdmin(
   gateway: AuthGateway,
-  accessToken: string,
-): Promise<AdminUser | null> {
-  const user = await gateway.getUser(accessToken)
-  if (!user) return null
-  return (await gateway.isActiveAdmin(user.id, accessToken)) ? user : null
+  token: string,
+): Promise<AuthSession | null> {
+  const session = await gateway.getSession(token)
+  if (!session) return null
+  return (await gateway.isActiveAdmin(session.user.id)) ? session : null
 }
 
 export function createAuthHandlers(options: AuthHandlerOptions) {
@@ -239,10 +226,9 @@ export function createAuthHandlers(options: AuthHandlerOptions) {
 
         const isAdmin = await options.gateway.isActiveAdmin(
           session.user.id,
-          session.accessToken,
         )
         if (!isAdmin) {
-          await options.gateway.signOut(session.accessToken).catch(() => undefined)
+          await options.gateway.signOut(session.token).catch(() => undefined)
           response.status(401).json(GENERIC_AUTH_ERROR)
           return
         }
@@ -283,15 +269,15 @@ export function createAuthHandlers(options: AuthHandlerOptions) {
       }
 
       const cookies = parseCookies(header(request, 'cookie'))
-      const accessToken = cookies[AUTH_COOKIES.access]
+      const token = cookies[AUTH_COOKIES.session]
 
       try {
-        if (accessToken) {
-          const user = await activeAdmin(options.gateway, accessToken)
-          if (user) {
+        if (token) {
+          const session = await activeAdmin(options.gateway, token)
+          if (session) {
             response.status(200).json({
               data: {
-                user,
+                user: session.user,
                 csrfToken: cookies[AUTH_COOKIES.csrf] ?? null,
               },
             })
@@ -299,7 +285,7 @@ export function createAuthHandlers(options: AuthHandlerOptions) {
           }
         }
 
-        response.setHeader('Set-Cookie', [expiredAccessCookie(secure)])
+        response.setHeader('Set-Cookie', [expiredSessionCookie(secure)])
         response.status(401).json(UNAUTHORIZED_ERROR)
       } catch {
         response.status(503).json(SERVICE_ERROR)
@@ -342,15 +328,14 @@ export function createAuthHandlers(options: AuthHandlerOptions) {
       }
 
       try {
-        const refreshToken = cookies[AUTH_COOKIES.refresh]
-        const refreshed = refreshToken
-          ? await options.gateway.refreshSession(refreshToken)
+        const token = cookies[AUTH_COOKIES.session]
+        const refreshed = token
+          ? await options.gateway.getSession(token)
           : null
         if (
           !refreshed ||
           !(await options.gateway.isActiveAdmin(
             refreshed.user.id,
-            refreshed.accessToken,
           ))
         ) {
           response.setHeader('Set-Cookie', expiredCookies(secure))
@@ -394,9 +379,9 @@ export function createAuthHandlers(options: AuthHandlerOptions) {
         return
       }
 
-      const accessToken = cookies[AUTH_COOKIES.access]
+      const token = cookies[AUTH_COOKIES.session]
       try {
-        if (accessToken) await options.gateway.signOut(accessToken)
+        if (token) await options.gateway.signOut(token)
       } catch {
         // Local session invalidation must still complete if the upstream is down.
       }

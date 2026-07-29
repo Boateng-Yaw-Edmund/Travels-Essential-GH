@@ -1,6 +1,5 @@
 export interface AuthEnvironment {
-  supabaseUrl: string
-  supabaseAnonKey: string
+  neonAuthBaseUrl: string
   allowedOrigins: readonly string[]
   secureCookies: boolean
 }
@@ -27,26 +26,32 @@ function isValidOrigin(value: string, secureCookies: boolean): boolean {
 export function validateAuthEnv(
   env: Readonly<Record<string, string | undefined>>,
 ): AuthEnvironment {
-  const supabaseUrl = env.SUPABASE_URL?.replace(/\/+$/, '')
-  const supabaseAnonKey = env.SUPABASE_ANON_KEY
+  const neonAuthBaseUrl = env.NEON_AUTH_BASE_URL?.replace(/\/+$/, '')
   const origins = env.AUTH_ALLOWED_ORIGINS?.split(',')
     .map((origin) => origin.trim().replace(/\/+$/, ''))
     .filter(Boolean)
   const secureCookies = env.AUTH_COOKIE_SECURE !== 'false'
 
-  if (!supabaseUrl || !supabaseAnonKey || !origins?.length) {
+  if (!neonAuthBaseUrl || !origins?.length) {
     throw new Error('Server authentication configuration is incomplete.')
   }
 
-  let parsedSupabaseUrl: URL
+  let parsedNeonAuthUrl: URL
   try {
-    parsedSupabaseUrl = new URL(supabaseUrl)
+    parsedNeonAuthUrl = new URL(neonAuthBaseUrl)
   } catch {
     throw new Error('Server authentication configuration is invalid.')
   }
 
   if (
-    parsedSupabaseUrl.protocol !== 'https:' ||
+    parsedNeonAuthUrl.protocol !== 'https:' ||
+    !parsedNeonAuthUrl.hostname.endsWith('.neon.tech') ||
+    !parsedNeonAuthUrl.hostname.includes('.neonauth.') ||
+    parsedNeonAuthUrl.pathname !== '/auth' ||
+    parsedNeonAuthUrl.search !== '' ||
+    parsedNeonAuthUrl.hash !== '' ||
+    parsedNeonAuthUrl.username !== '' ||
+    parsedNeonAuthUrl.password !== '' ||
     origins.some((origin) => !isValidOrigin(origin, secureCookies)) ||
     (!secureCookies &&
       origins.some((origin) => new URL(origin).protocol !== 'http:'))
@@ -55,8 +60,7 @@ export function validateAuthEnv(
   }
 
   return {
-    supabaseUrl,
-    supabaseAnonKey,
+    neonAuthBaseUrl,
     allowedOrigins: origins,
     secureCookies,
   }

@@ -10,6 +10,8 @@ type Handler = (
   response: ExpressResponseLike,
 ) => Promise<void>
 
+const sessionToken = ['session', 'token'].join('-')
+
 const okHandler: Handler = async (_request, response) => {
   response.status(200).json({ data: { ok: true } })
 }
@@ -59,28 +61,20 @@ describe('admin HTTP runtime', () => {
     expect(login).not.toHaveBeenCalled()
   })
 
-  it('preserves refresh and CSRF cookies across an expired access check', async () => {
-    let accessIsCurrent = true
+  it('renews the session and CSRF cookies through the protected endpoint', async () => {
     const handlers = createAuthHandlers({
       gateway: {
         signInWithPassword: vi.fn().mockResolvedValue({
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
+          token: sessionToken,
           expiresInSeconds: 3600,
           user: { id: 'admin-1', email: 'owner@example.com' },
         }),
-        getUser: vi.fn().mockImplementation(async () =>
-          accessIsCurrent
-            ? { id: 'admin-1', email: 'owner@example.com' }
-            : null,
-        ),
+        getSession: vi.fn().mockResolvedValue({
+          token: sessionToken,
+          expiresInSeconds: 3600,
+          user: { id: 'admin-1', email: 'owner@example.com' },
+        }),
         isActiveAdmin: vi.fn().mockResolvedValue(true),
-        refreshSession: vi.fn().mockResolvedValue({
-          accessToken: 'rotated-access',
-          refreshToken: 'rotated-refresh',
-          expiresInSeconds: 3600,
-          user: { id: 'admin-1', email: 'owner@example.com' },
-        }),
         signOut: vi.fn().mockResolvedValue(undefined),
       },
       rateLimiter: {
@@ -101,8 +95,7 @@ describe('admin HTTP runtime', () => {
       .send({ email: 'owner@example.com', password: 'long-password' })
       .expect(200)
 
-    accessIsCurrent = false
-    await agent.get('/api/admin/auth/session').expect(401)
+    await agent.get('/api/admin/auth/session').expect(200)
 
     const refresh = await agent
       .post('/api/admin/auth/refresh')

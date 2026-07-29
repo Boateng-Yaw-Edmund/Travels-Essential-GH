@@ -1,8 +1,7 @@
 import type { HeaderValue } from './types'
 
 export const AUTH_COOKIES = {
-  access: 'tegh_access',
-  refresh: 'tegh_refresh',
+  session: 'tegh_session',
   csrf: 'tegh_csrf',
 } as const
 

@@ -41,31 +41,6 @@ const readSession = (payload: AuthEnvelope): AdminSession | null => {
   return user && csrfToken ? { user, csrfToken } : null
 }
 
-const readCsrfCookie = (): string | null => {
-  const prefix = 'tegh_csrf='
-  const value = document.cookie
-    .split(';')
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(prefix))
-
-  return value ? decodeURIComponent(value.slice(prefix.length)) : null
-}
-
-const refreshAdminSession = async (csrfToken: string): Promise<AdminSession | null> => {
-  try {
-    const payload = await request('/api/admin/auth/refresh', {
-      method: 'POST',
-      headers: { 'X-CSRF-Token': csrfToken },
-    })
-    return readSession(payload)
-  } catch (error) {
-    if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
-      return null
-    }
-    throw error
-  }
-}
-
 export const getAdminSession = async (): Promise<AdminSession | null> => {
   try {
     const payload = await request('/api/admin/auth/session')
@@ -75,8 +50,7 @@ export const getAdminSession = async (): Promise<AdminSession | null> => {
     return isAuthenticated ? readSession(payload) : null
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
-      const csrfToken = readCsrfCookie()
-      return csrfToken ? refreshAdminSession(csrfToken) : null
+      return null
     }
 
     throw error

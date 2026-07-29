@@ -10,9 +10,10 @@ Endpoints:
 - `POST /api/admin/auth/refresh`
 - `POST /api/admin/auth/logout`
 
-Access and refresh tokens are held only in `HttpOnly`, `Secure`,
-`SameSite=Strict` cookies. Login and session responses return a CSRF token for
-the frontend to keep in memory. Logout sends that value in `X-CSRF-Token`.
+The Neon Auth session token is held only in an `HttpOnly`, `Secure`,
+`SameSite=Strict` cookie. Login and session responses return a CSRF token for
+the frontend to keep in memory. Renewal and logout send that value in
+`X-CSRF-Token`.
 
 ## Runtime wiring
 
@@ -32,19 +33,28 @@ all instances enforce the same login-attempt counter. `server/index.ts`
 therefore fails closed when `NODE_ENV=production` until that deployment
 adapter is added.
 
-## Supabase egress discipline
+## Neon database wiring
+
+- `DATABASE_URL` must use the pooled Neon host and is used for runtime queries.
+- `DATABASE_URL_UNPOOLED` must use the direct host and is reserved for
+  migrations and administrative work.
+- Both connections require TLS and are validated without exposing credentials
+  in error messages.
+- Run `npm run db:check` for a one-row connection test. It does not start the
+  application server.
+
+## Neon authentication
 
 - Restore the admin session once when the dashboard boots; do not poll it.
-- The GET session route never refreshes or rotates credentials. Expired access
-  is refreshed only by the origin-checked, CSRF-protected, rate-limited POST
-  refresh route.
+- The GET session route validates the existing Neon Auth bearer session.
+- The origin-checked, CSRF-protected, rate-limited POST refresh route renews
+  the local cookie lifetime only after Neon Auth validates the same session.
 - Auth responses contain only small identity records and never return profile
   lists.
-- The gateway selects only `user_id` with `limit=1` for the admin check.
-- Keep authorization checks fresh for sensitive mutations. If auth traffic
-  becomes material, locally verify Supabase JWT signatures using a cached JWKS
-  and retain a single narrow admin-membership lookup.
-- Product media belongs to the next phase. Upload directly to Supabase Storage,
-  reject oversized originals, generate one thumbnail and one display image,
-  prefer WebP/AVIF, use immutable cache headers, and never proxy image bytes
-  through this API.
+- Authorization queries the managed `neon_auth.user` row by UUID and allows
+  only users whose role is `admin` and who are not banned.
+- Keep the authorization check fresh for every sensitive mutation.
+- Product media belongs to the next phase and will use object storage plus a
+  CDN rather than Postgres. Reject oversized originals, generate one thumbnail
+  and one display image, prefer WebP/AVIF, use immutable cache headers, and
+  never proxy image bytes through this API.

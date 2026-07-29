@@ -4,18 +4,16 @@ export interface AdminUser {
 }
 
 export interface AuthSession {
-  accessToken: string
-  refreshToken: string
+  token: string
   expiresInSeconds: number
   user: AdminUser
 }
 
 export interface AuthGateway {
   signInWithPassword(email: string, password: string): Promise<AuthSession | null>
-  refreshSession(refreshToken: string): Promise<AuthSession | null>
-  getUser(accessToken: string): Promise<AdminUser | null>
-  isActiveAdmin(userId: string, accessToken: string): Promise<boolean>
-  signOut(accessToken: string): Promise<void>
+  getSession(token: string): Promise<AuthSession | null>
+  isActiveAdmin(userId: string): Promise<boolean>
+  signOut(token: string): Promise<void>
 }
 
 export interface RateLimitResult {
