@@ -33,6 +33,12 @@ Keys are SHA-256 hashes and a database failure denies the attempt.
 
 ## Coolify production deployment
 
+For an HTTP-only storefront preview, set `STOREFRONT_PREVIEW=true` in Coolify
+as a runtime variable. Admin pages and auth APIs return 404; Neon credentials
+are not required or used. The storefront remains a mockup: cart controls work
+locally, but orders and payments are not processed. Remove preview mode only
+after configuring HTTPS, database roles, migrations, and authentication.
+
 Use the repository Dockerfile with internal port `3000` and health endpoint
 `/api/health`. Do not publish a host port; route through Coolify's proxy.
 `npm start` serves the built storefront and API on the same origin. The

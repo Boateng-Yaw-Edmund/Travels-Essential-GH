@@ -7,6 +7,14 @@ import { createServerApp } from '../../server/app'
 import { createPostgresRateLimiter } from '../../server/security/postgres-rate-limiter'
 
 describe('production runtime', () => {
+  it('disables admin pages and auth endpoints in storefront preview mode', async () => {
+    const app = createServerApp({})
+    for (const path of ['/admin', '/api/admin/auth/session']) {
+      expect((await request(app).get(path)).status).toBe(404)
+    }
+    expect((await request(app).post('/api/admin/auth/login').send({})).status).toBe(404)
+    expect((await request(app).get('/api/health')).status).toBe(200)
+  })
   it('serves the SPA while keeping missing API routes and assets as 404s', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'travel-production-'))
     writeFileSync(join(directory, 'index.html'), '<html>Travel shop</html>')

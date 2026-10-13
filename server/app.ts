@@ -24,7 +24,7 @@ interface ServerHandlers {
 }
 
 interface ServerAppOptions {
-  handlers: ServerHandlers
+  handlers?: ServerHandlers
   staticDirectory?: string
   trustedProxy?: string
 }
@@ -38,10 +38,20 @@ export function createServerApp(options: ServerAppOptions): Express {
     helmet({
       referrerPolicy: { policy: 'no-referrer' },
       crossOriginResourcePolicy: { policy: 'same-origin' },
+      strictTransportSecurity: options.handlers ? undefined : false,
+      contentSecurityPolicy: options.handlers ? undefined : {
+        directives: { upgradeInsecureRequests: null },
+      },
     }),
   )
-  app.use('/api/admin/auth', express.json({ limit: '16kb', strict: true }))
-  registerAdminAuthRoutes(app, options.handlers)
+  if (options.handlers) {
+    app.use('/api/admin/auth', express.json({ limit: '16kb', strict: true }))
+    registerAdminAuthRoutes(app, options.handlers)
+  } else {
+    app.use('/admin', (_request, response) => {
+      response.status(404).send('Admin is unavailable in storefront preview mode.')
+    })
+  }
   app.get('/api/health', (_request, response) => {
     response.setHeader('Cache-Control', 'no-store')
     response.json({ data: { ok: true } })

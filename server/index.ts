@@ -11,9 +11,11 @@ import { createNeonAuthGateway } from './neon/auth-gateway'
 import { FixedWindowRateLimiter } from './security/fixed-window-rate-limiter'
 import { createPostgresRateLimiter } from './security/postgres-rate-limiter'
 
+const production = process.env.NODE_ENV === 'production'
+function buildAuthHandlers() {
+if (process.env.STOREFRONT_PREVIEW === 'true') return undefined
 const environment = validateAuthEnv(process.env)
 const databaseEnvironment = validateDatabaseEnv(process.env)
-const production = process.env.NODE_ENV === 'production'
 if (production && !environment.secureCookies) throw new Error('Production requires secure cookies.')
 const runtimeEnvironment =
   process.env.NODE_ENV === 'test' ? 'test' : 'development'
@@ -29,14 +31,15 @@ const gateway = createNeonAuthGateway({
   isActiveAdmin: adminRepository.isActiveAdmin,
   revokeSession: adminRepository.revokeSession,
 })
-const handlers = createAuthHandlers({
+return createAuthHandlers({
   gateway,
   rateLimiter,
   allowedOrigins: environment.allowedOrigins,
   secureCookies: environment.secureCookies,
 })
+}
 const app = createServerApp({
-  handlers,
+  handlers: buildAuthHandlers(),
   staticDirectory: production ? resolve('dist') : undefined,
   trustedProxy: production ? process.env.TRUSTED_PROXY_CIDRS : undefined,
 })
