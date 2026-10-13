@@ -3,6 +3,7 @@ import express, {
   type Express,
 } from 'express'
 import helmet from 'helmet'
+import { join } from 'node:path'
 
 import { registerAdminAuthRoutes } from './auth/routes'
 import type {
@@ -24,12 +25,15 @@ interface ServerHandlers {
 
 interface ServerAppOptions {
   handlers: ServerHandlers
+  staticDirectory?: string
+  trustedProxy?: string
 }
 
 export function createServerApp(options: ServerAppOptions): Express {
   const app = express()
 
   app.disable('x-powered-by')
+  if (options.trustedProxy) app.set('trust proxy', options.trustedProxy)
   app.use(
     helmet({
       referrerPolicy: { policy: 'no-referrer' },
@@ -38,6 +42,10 @@ export function createServerApp(options: ServerAppOptions): Express {
   )
   app.use('/api/admin/auth', express.json({ limit: '16kb', strict: true }))
   registerAdminAuthRoutes(app, options.handlers)
+  app.get('/api/health', (_request, response) => {
+    response.setHeader('Cache-Control', 'no-store')
+    response.json({ data: { ok: true } })
+  })
 
   app.use('/api', (_request, response) => {
     response.status(404).json({
@@ -47,6 +55,18 @@ export function createServerApp(options: ServerAppOptions): Express {
       },
     })
   })
+
+  if (options.staticDirectory) {
+    const directory = options.staticDirectory
+    app.use('/assets', express.static(join(directory, 'assets'), {
+      maxAge: '1y', immutable: true, index: false, dotfiles: 'deny',
+    }))
+    app.use(express.static(directory, { index: false, dotfiles: 'deny' }))
+    app.get(['/', '/admin'], (_request, response) => {
+      response.setHeader('Cache-Control', 'no-cache')
+      response.sendFile(join(directory, 'index.html'))
+    })
+  }
 
   const safeErrorHandler: ErrorRequestHandler = (
     error,

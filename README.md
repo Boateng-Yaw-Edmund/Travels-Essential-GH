@@ -26,6 +26,19 @@ npm run db:check
 reserved for schema migrations and administrative tasks. Never expose either
 value through a `VITE_*` variable or commit `.env.local`.
 
+Catalogue migrations are committed under `drizzle/` and run in one database
+transaction over the direct connection. Apply them only to the intended Neon
+branch by naming it explicitly:
+
+```bash
+npm run db:migrate -- --target development
+```
+
+Production must use a least-privilege runtime database role that differs from
+the migration role. Production migration commands also require the deployment
+environment to set `ALLOW_PRODUCTION_MIGRATION=true`; do not place that flag in
+local environment files.
+
 Create the first owner from an interactive VS Code terminal:
 
 ```bash
@@ -75,6 +88,8 @@ npm run test:e2e
 - Neon Auth bearer-session gateway with Postgres-backed admin authorization
 - Neon development branch with cost-limited autoscaling
 - Validated pooled Neon/Drizzle database adapter
+- Transactional, branch-guarded catalogue migrations
+- Product, category, SKU/colour variant, media-metadata, and audit schema
 - Route-split storefront and admin bundles
 
 ## Egress controls

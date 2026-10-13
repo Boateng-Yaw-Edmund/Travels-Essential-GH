@@ -28,6 +28,24 @@ describe('validateDatabaseEnv', () => {
     ).toThrow('Server database configuration is incomplete.')
   })
 
+  it('requires separate runtime and migration roles in production', () => {
+    expect(() =>
+      validateDatabaseEnv({
+        NODE_ENV: 'production',
+        DATABASE_URL: pooledUrl,
+        DATABASE_URL_UNPOOLED: directUrl,
+      }),
+    ).toThrow('Production runtime and migration database roles must differ.')
+
+    expect(
+      validateDatabaseEnv({
+        NODE_ENV: 'production',
+        DATABASE_URL: pooledUrl.replace('app:secret', 'runtime:secret'),
+        DATABASE_URL_UNPOOLED: directUrl.replace('app:secret', 'migrator:secret'),
+      }),
+    ).toBeDefined()
+  })
+
   it.each([
     ['a non-Neon host', directUrl.replace('neon.tech', 'example.com'), directUrl],
     ['a direct runtime URL', directUrl, directUrl],

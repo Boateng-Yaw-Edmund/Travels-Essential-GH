@@ -40,8 +40,18 @@ export function validateDatabaseEnv(
     throw new Error('Server database configuration is incomplete.')
   }
 
-  if (!parseNeonUrl(pooledUrl, true) || !parseNeonUrl(directUrl, false)) {
+  const parsedPooledUrl = parseNeonUrl(pooledUrl, true)
+  const parsedDirectUrl = parseNeonUrl(directUrl, false)
+
+  if (!parsedPooledUrl || !parsedDirectUrl) {
     throw new Error('Server database configuration is invalid.')
+  }
+
+  if (
+    env.NODE_ENV === 'production' &&
+    parsedPooledUrl.username === parsedDirectUrl.username
+  ) {
+    throw new Error('Production runtime and migration database roles must differ.')
   }
 
   return {
